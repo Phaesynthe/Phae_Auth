@@ -16,10 +16,10 @@ catch (e) {
 var config = {
   port: local.port || process.env.HOST_PORT || 80,
   db: {
-    host     : local.db.host     || process.env.DB_HOST,
-    user     : local.db.user     || process.env.DB_USER,
-    password : local.db.password || process.env.DB_PASSWORD,
-    database : local.db.database || process.env.DB_DATABASE
+    host     : local.dbHost     || process.env.DB_HOST,
+    user     : local.dbUser     || process.env.DB_USER,
+    password : local.dbPassword || process.env.DB_PASSWORD,
+    database : local.dbDatabase || process.env.DB_DATABASE
   }
 };
 
