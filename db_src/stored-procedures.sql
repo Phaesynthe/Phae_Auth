@@ -22,31 +22,30 @@ CREATE PROCEDURE phae_auth.validate_login (
       pass_key = SHA2(CONCAT(providedPass, salt), 512) /* validate the password */
     );
 
-	IF (credential_Id IS NOT NULL)
-		THEN
-			UPDATE
+	IF (credential_Id IS NOT NULL) THEN
+		UPDATE
+			auth_credentials
+		SET
+			last_activity = CURDATE()
+		WHERE
+			login_credential_id = credential_Id
+			AND
+			indicator_credential = providedName
+			AND
+			is_active = 1
+		;
+    SET validated_account_id = (
+			SELECT
+				account_id
+			FROM
 				auth_credentials
-			SET
-				last_activity = CURDATE()
 			WHERE
 				login_credential_id = credential_Id
 				AND
 				indicator_credential = providedName
 				AND
 				is_active = 1
-			;
-      SET validated_account_id = (
-				SELECT
-					account_id
-				FROM
-					auth_credentials
-				WHERE
-					login_credential_id = credential_Id
-					AND
-					indicator_credential = providedName
-					AND
-					is_active = 1
-      );
+    );
 	END IF;
 END // /* END Validation Logic */
 
@@ -59,13 +58,12 @@ CREATE PROCEDURE phae_auth.validate_login_old (
 
 	SELECT
 		CASE
-			WHEN (pass_key = SHA2(CONCAT(providedPass, salt), 512))
-				THEN
-					(@validated_account_id := account_id )
+			WHEN (pass_key = SHA2(CONCAT(providedPass, salt), 512)) THEN
+				(@validated_account_id := account_id )
 			ELSE
 				(@validated_account_id := NULL )
 		END,
-        (@validated_indicator_credential := indicator_credential)
+      (@validated_indicator_credential := indicator_credential)
 	FROM
 		auth_credentials
 	WHERE
@@ -74,20 +72,18 @@ CREATE PROCEDURE phae_auth.validate_login_old (
 		is_active = 1
 	;
 
-	IF
-		validated_account_id IS NOT NULL
-			THEN
-				UPDATE
-					auth_credentials
-				SET
-					last_activity = CURDATE()
-				WHERE
-					login_credential_id = @validated_indicator_credential
-					AND
-					indicator_credential = providedName
-					AND
-					is_active = 1
-				;
+	IF validated_account_id IS NOT NULL THEN
+		UPDATE
+			auth_credentials
+		SET
+			last_activity = CURDATE()
+		WHERE
+			login_credential_id = @validated_indicator_credential
+			AND
+			indicator_credential = providedName
+			AND
+			is_active = 1
+		;
 	END IF;
 END //
 /* END Validation Logic */
@@ -149,8 +145,8 @@ CREATE PROCEDURE phae_auth.disable_account (
 		is_active = 0
 	WHERE
 		account_id = 1
-        AND
-        login_credential_id != 0
+    AND
+    login_credential_id != 0
 	;
 END // /* END Disable account */
 
