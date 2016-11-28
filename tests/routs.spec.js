@@ -2,6 +2,7 @@ const chai = require('chai');
 const chaiHttp = require('chai-http');
 const expect = require('expect');
 const express = require('express');
+const sinon = require('sinon');
 
 const config = require('../app/config');
 
@@ -9,9 +10,24 @@ const config = require('../app/config');
 var routs = require('../app/routs');
 var app = express();
 
+// Required Module
+var dal = require('../app/dal');
+
 chai.use(chaiHttp);
 
 describe('Routs', () => {
+  var passToken = 'test token';
+
+  before(() => {
+    var stub = sinon.stub(dal, 'validateCredentials', (user, passcode) => {
+      if (user === 'fail_user') {
+        return {};
+      }
+      return {
+        bearer: passToken
+      };
+    });
+  });
 
   it('initializes', () => {
     expect(() => {
@@ -71,8 +87,22 @@ describe('Routs', () => {
         .end((err, res) => {
           expect(err).toBe.null;
           expect(res.status).toBe(200);
-          expect(res.body.bearer).toExist();
-          expect(res.body.refresh).toExist();
+          expect(res.body.bearer).toBe(passToken);
+          done();
+        });
+    });
+
+    it('fails with invalid credintals', done => {
+      chai.request(app)
+        .post('/login')
+        .send({
+          passcode: 'test_pass',
+          user: 'fail_user'
+        })
+        .end((err, res) => {
+          expect(err).toBe.null;
+          expect(res.status).toBe(403);
+          expect(typeof res.body.bearer).toBe('undefined');
           done();
         });
     });

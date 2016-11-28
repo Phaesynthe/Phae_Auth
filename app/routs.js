@@ -24,15 +24,26 @@ module.exports = {
     app.post('/login', (req, res) => {
       var user = req.body.user;
       var passcode = req.body.passcode;
+      var result;
 
       if (!user || !passcode) {
         res.status(400).send(); // Incomplete request
         return;
       }
 
+      result = dal.validateCredentials(user, passcode);
+      // result = {}; // For testing
+
+      // This is checking against the result contents, not an error object
+      if (typeof result.bearer === 'undefined') {
+        res.status(403).send();
+        return;
+      }
+
       res.status(200).send({
-        bearer: 'token that will be supplied from DAL',
-        refresh: 'token that will be supplied from DAL'
+        bearer: result.bearer
+        // ,
+        // refresh: result.refresh
       });
     });
 

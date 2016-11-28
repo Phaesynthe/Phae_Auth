@@ -1,7 +1,15 @@
 // Currently Unused
 
 const sql = require('mysql');
-const db = {};
+
+const db = sql.createConnection({
+  host     : 'localhost',
+  user     : 'me',
+  password : 'secret',
+  database : 'my_db'
+});
+
+// db.connect();
 
 module.exports = (function () {
 
@@ -9,23 +17,13 @@ module.exports = (function () {
     /**
      * Passes a username/password pair to the database store procedure for validation.
      **/
-    validateCredentials () {
-      db.connect( err => {
-        if (err) throw err;
+    validateCredentials (user, passcode) {
+      // hit DB with pair
+      // Success will contain a token
 
-        // execute a query on our database
-        db.query('SELECT $1::text as name', ['brianc'], function (err, result) {
-          if (err) throw err;
-
-          // just print the result to the console
-          console.log(result.rows[0]);
-
-          // disconnect the client
-          db.end(err => {
-            if (err) throw err;
-          });
-        });
-      });
+      return {
+        bearer: 'test'
+      };
     }
   };
 })();
